@@ -1,25 +1,22 @@
 from flask import Flask, render_template, request, jsonify
-from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
-from tensorflow.keras.preprocessing import image
 import numpy as np
 import tensorflow as tf
-import os
+from PIL import Image
 import io
 
 app = Flask(__name__)
 
 # Load the Keras model
-model = tf.keras.models.load_model('models/NEW.h5')
+model = tf.keras.models.load_model('models/Model100.h5')
 
 # Define your class labels
-class_labels = ['Benign', 'Early Pre-B', 'Healthy', 'Pre-B', 'Pro-B']
+class_labels = ['Pre-B', 'Early Pre-B', 'Pro-B', 'Benign', 'Healthy']
 
 def predict_image(img, model, class_labels):
-    # Preprocess the image
+    # Preprocess the image using Pillow
     img = img.resize((224, 224))  # Resize the image
-    img_array = image.img_to_array(img)
+    img_array = np.array(img).astype('float32') / 255.0  # Rescale the image
     img_array = np.expand_dims(img_array, axis=0)
-    img_array = preprocess_input(img_array)
 
     # Predict
     predictions = model.predict(img_array)
@@ -48,7 +45,7 @@ def classify():
         return 'No selected file'
 
     # Read image from memory
-    img = image.load_img(io.BytesIO(file.read()), target_size=(224, 224))
+    img = Image.open(io.BytesIO(file.read()))
 
     # Get prediction and confidence
     predicted_class, confidence = predict_image(img, model, class_labels)
@@ -62,6 +59,4 @@ def classify():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
 
