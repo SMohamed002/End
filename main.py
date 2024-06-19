@@ -1,7 +1,7 @@
 import logging
 from flask import Flask, render_template, request, jsonify
 import numpy as np
-import tensorflow as tf
+from keras.models import load_model  # استيراد load_model من Keras بدلاً من tf.keras
 from PIL import Image
 import io
 
@@ -10,10 +10,10 @@ app = Flask(__name__)
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
-# Load the Keras model
+# Load the Keras model using Keras's load_model
 try:
     logging.info("Loading model...")
-    model = tf.keras.models.load_model('models/Model100.h5')
+    model = load_model('models/Model100.h5')  # استخدام load_model من Keras
     logging.info("Model loaded successfully.")
 except Exception as e:
     logging.error(f"Error loading model: {e}")
