@@ -1,3 +1,4 @@
+import logging
 from flask import Flask, render_template, request, jsonify
 import numpy as np
 import tensorflow as tf
@@ -6,8 +7,17 @@ import io
 
 app = Flask(__name__)
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+
 # Load the Keras model
-model = tf.keras.models.load_model('models/Model100.h5')
+try:
+    logging.info("Loading model...")
+    model = tf.keras.models.load_model('models/Model100.h5')
+    logging.info("Model loaded successfully.")
+except Exception as e:
+    logging.error(f"Error loading model: {e}")
+    model = None
 
 # Define your class labels
 class_labels = ['Pre-B', 'Early Pre-B', 'Pro-B', 'Benign', 'Healthy']
@@ -36,27 +46,31 @@ def index():
 def classify():
     # Check if the POST request has the file part
     if 'imageFile' not in request.files:
-        return 'No file part'
+        return jsonify({'error': 'No file part'}), 400
 
     file = request.files['imageFile']
 
     # If the user does not select a file, the browser submits an empty file without a filename
     if file.filename == '':
-        return 'No selected file'
+        return jsonify({'error': 'No selected file'}), 400
 
-    # Read image from memory
-    img = Image.open(io.BytesIO(file.read()))
+    try:
+        # Read image from memory
+        img = Image.open(io.BytesIO(file.read()))
 
-    # Get prediction and confidence
-    predicted_class, confidence = predict_image(img, model, class_labels)
+        # Get prediction and confidence
+        predicted_class, confidence = predict_image(img, model, class_labels)
 
-    # Return the result
-    result = {
-        'class': predicted_class,
-        'confidence': float(confidence)  # Convert confidence to float for JSON serialization
-    }
-    return jsonify(result)
+        # Return the result
+        result = {
+            'class': predicted_class,
+            'confidence': float(confidence)  # Convert confidence to float for JSON serialization
+        }
+        return jsonify(result)
+
+    except Exception as e:
+        logging.error(f"Error processing image: {e}")
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
-
