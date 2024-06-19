@@ -1,0 +1,6 @@
+gunicorn
+pillow
+Flask
+tensorflow
+
+
