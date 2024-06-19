@@ -9,7 +9,7 @@ import io
 app = Flask(__name__)
 
 # Load the Keras model
-model = tf.keras.models.load_model('models/Saeed.h5')
+model = tf.keras.models.load_model('models/New.h5')
 
 # Define your class labels
 class_labels = ['Benign', 'Early Pre-B', 'Healthy', 'Pre-B', 'Pro-B']
