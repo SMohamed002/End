@@ -1,23 +1,13 @@
-import logging
 from flask import Flask, render_template, request, jsonify
 import numpy as np
-from keras.models import load_model  # استيراد load_model من Keras بدلاً من tf.keras
+import tensorflow as tf
 from PIL import Image
 import io
 
 app = Flask(__name__)
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-
-# Load the Keras model using Keras's load_model
-try:
-    logging.info("Loading model...")
-    model = load_model('models/Model100.h5')  # استخدام load_model من Keras
-    logging.info("Model loaded successfully.")
-except Exception as e:
-    logging.error(f"Error loading model: {e}")
-    model = None
+# Load the Keras model
+model = tf.keras.models.load_model('models/Model100.h5')
 
 # Define your class labels
 class_labels = ['Pre-B', 'Early Pre-B', 'Pro-B', 'Benign', 'Healthy']
@@ -46,31 +36,26 @@ def index():
 def classify():
     # Check if the POST request has the file part
     if 'imageFile' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
+        return 'No file part'
 
     file = request.files['imageFile']
 
     # If the user does not select a file, the browser submits an empty file without a filename
     if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
+        return 'No selected file'
 
-    try:
-        # Read image from memory
-        img = Image.open(io.BytesIO(file.read()))
+    # Read image from memory
+    img = Image.open(io.BytesIO(file.read()))
 
-        # Get prediction and confidence
-        predicted_class, confidence = predict_image(img, model, class_labels)
+    # Get prediction and confidence
+    predicted_class, confidence = predict_image(img, model, class_labels)
 
-        # Return the result
-        result = {
-            'class': predicted_class,
-            'confidence': float(confidence)  # Convert confidence to float for JSON serialization
-        }
-        return jsonify(result)
-
-    except Exception as e:
-        logging.error(f"Error processing image: {e}")
-        return jsonify({'error': str(e)}), 500
+    # Return the result
+    result = {
+        'class': predicted_class,
+        'confidence': float(confidence)  # Convert confidence to float for JSON serialization
+    }
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run(debug=True)
