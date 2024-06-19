@@ -1,6 +1,6 @@
-gunicorn>= 22.0.0
-pillow>= 10.3.0
-Flask>= 3.0.3
-keras>= 2.15.0
-numpy>= 1.26.4
+gunicorn
+pillow
+Flask
+tensorflow>= 2.15.0
+numpy
 
