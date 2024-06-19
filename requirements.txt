@@ -1,6 +1,6 @@
 gunicorn
 pillow
 Flask
-tensorflow>= 2.14.0
+tensorflow>= 2.15.0
 numpy
-
+keras>= 2.15.0
